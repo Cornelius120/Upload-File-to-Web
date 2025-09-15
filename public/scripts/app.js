@@ -1,4 +1,3 @@
-// --- Bagian Baru: Untuk menampilkan nama file yang dipilih ---
 const fileInput = document.getElementById("file-input");
 const fileNameDisplay = document.getElementById("file-name-display");
 
@@ -9,73 +8,75 @@ fileInput.addEventListener("change", () => {
     fileNameDisplay.textContent = "Klik untuk memilih file...";
   }
 });
-// --- Akhir Bagian Baru ---
 
 document
   .getElementById("upload-form")
   .addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    // const fileInput = document.getElementById('file-input'); // sudah dideklarasi di atas
     const urlInput = document.getElementById("url-input");
     const submitButton = document.getElementById("submit-button");
     const progressIndicator = document.getElementById("progress-indicator");
-    const resultsArea = document.getElementById("results-area"); // Ganti ke results-area
+    const resultsArea = document.getElementById("results-area");
     const resultsList = document.getElementById("results-list");
 
-    // Tampilkan indikator loading dan nonaktifkan tombol
+    function showClientError(message) {
+      resultsList.innerHTML = ""; // Hapus hasil lama
+      const li = document.createElement("li");
+      li.textContent = message;
+      li.style.color = "#ff6b6b"; // Warna merah untuk error
+      resultsList.appendChild(li);
+      resultsArea.classList.remove("hidden");
+      submitButton.disabled = false;
+      progressIndicator.classList.add("hidden");
+    }
+
     submitButton.disabled = true;
     progressIndicator.classList.remove("hidden");
-    resultsArea.classList.add("hidden"); // Sembunyikan hasil lama
-    resultsList.innerHTML = ""; // Bersihkan hasil sebelumnya
+    resultsArea.classList.add("hidden");
+    resultsList.innerHTML = "";
 
-    // Kumpulkan host yang dipilih
     const selectedHosts = Array.from(
       document.querySelectorAll('input[name="hosts"]:checked')
     ).map((cb) => cb.value);
 
     if (selectedHosts.length === 0) {
-      alert("Pilih setidaknya satu host!");
-      submitButton.disabled = false;
-      progressIndicator.classList.add("hidden");
+      showClientError(
+        "Kesalahan: Anda harus memilih setidaknya satu host tujuan."
+      );
       return;
     }
 
-    // Siapkan data untuk dikirim ke backend
     const formData = new FormData();
     if (fileInput.files.length > 0) {
       formData.append("file", fileInput.files[0]);
     } else if (urlInput.value) {
       formData.append("url", urlInput.value);
     } else {
-      alert("Pilih file atau masukkan URL!");
-      submitButton.disabled = false;
-      progressIndicator.classList.add("hidden");
+      showClientError(
+        "Kesalahan: Anda harus memilih file atau memasukkan URL."
+      );
       return;
     }
 
     formData.append("hosts", JSON.stringify(selectedHosts));
 
     try {
-      // Kirim data ke Netlify Function 'upload'
       const response = await fetch("/.netlify/functions/upload", {
         method: "POST",
-        body: formData, // FormData akan otomatis mengatur header Content-Type
+        body: formData,
       });
 
+      const resultData = await response.json();
       if (!response.ok) {
-        // Tangani error dari server dengan lebih baik
-        const errorData = await response.json();
         throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
+          resultData.message ||
+            `Terjadi error di server (Status: ${response.status})`
         );
       }
 
-      const results = await response.json();
-
-      // Tampilkan hasil
-      if (results.success && results.links.length > 0) {
-        results.links.forEach((link) => {
+      if (resultData.success && resultData.links.length > 0) {
+        resultData.links.forEach((link) => {
           const li = document.createElement("li");
           if (link.error) {
             li.innerHTML = `<strong>${link.host}:</strong> <span style="color: #ff6b6b;">Gagal - ${link.error}</span>`;
@@ -84,21 +85,15 @@ document
           }
           resultsList.appendChild(li);
         });
-        resultsArea.classList.remove("hidden"); // Tampilkan area hasil
+        resultsArea.classList.remove("hidden");
       } else {
-        // Jika tidak ada link sukses, tampilkan pesan
         throw new Error(
-          results.message || "Tidak ada link yang berhasil dibuat."
+          resultData.message || "Tidak ada link yang berhasil dibuat."
         );
       }
     } catch (error) {
-      const li = document.createElement("li");
-      li.textContent = `Error: ${error.message}`;
-      li.style.color = "red";
-      resultsList.appendChild(li);
-      resultsArea.classList.remove("hidden"); // Tampilkan area hasil meskipun error
+      showClientError(`Error: ${error.message}`);
     } finally {
-      // Sembunyikan loading dan aktifkan kembali tombol
       submitButton.disabled = false;
       progressIndicator.classList.add("hidden");
     }
