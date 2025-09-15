@@ -8,9 +8,7 @@ exports.handler = async (event) => {
   console.log("Fungsi 'upload' dipanggil.");
 
   if (!FILEMOON_API_KEY) {
-    console.error(
-      "FATAL: FILEMOON_API_KEY tidak diatur di Environment Variables."
-    );
+    console.error("FATAL: FILEMOON_API_KEY tidak diatur.");
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -21,24 +19,28 @@ exports.handler = async (event) => {
   }
 
   try {
-    console.log("Mencoba mem-parsing data dari event...");
-    const data = parse(event, true);
-
-    // --- MATA-MATA (DEBUGGING LOG) ---
-    // Kita akan mencetak seluruh data yang berhasil di-parse ke log
-    // untuk melihat strukturnya dengan jelas.
-    console.log("HASIL PARSING DATA:", JSON.stringify(data, null, 2));
-    // --- AKHIR DARI MATA-MATA ---
-
-    if (!data || !data.hosts) {
-      // Jika 'hosts' tidak ada di dalam data, kita lempar error yang lebih jelas.
+    let data;
+    try {
+      console.log("Mencoba mem-parsing data dari event...");
+      data = parse(event, true);
+    } catch (parseError) {
+      // Menangkap crash fatal dari parser jika terjadi (khususnya saat upload file)
+      console.error("CRASH saat parsing multipart data:", parseError);
       throw new Error(
-        "Parsing gagal: Properti 'hosts' tidak ditemukan dalam data yang diterima. Cek data yang dikirim dari frontend dan hasil parsing di atas."
+        `Terjadi kesalahan internal saat memproses file Anda. Error: ${parseError.message}`
+      );
+    }
+
+    console.log("HASIL PARSING DATA:", JSON.stringify(data, null, 2));
+
+    // FIX: Mengecek 'hosts' dengan lebih aman. Jika tidak ada, lempar error.
+    if (!data || typeof data.hosts !== "string") {
+      throw new Error(
+        "Parsing gagal: Properti 'hosts' tidak ditemukan atau bukan string. Cek data dari frontend."
       );
     }
 
     const selectedHosts = JSON.parse(data.hosts);
-
     let fileBuffer;
     let fileName;
 
@@ -51,21 +53,19 @@ exports.handler = async (event) => {
       const remoteResponse = await fetch(data.url);
       if (!remoteResponse.ok) {
         throw new Error(
-          `Gagal mengunduh file dari URL. Server merespon dengan status: ${remoteResponse.status}`
+          `Gagal mengunduh file dari URL. Status: ${remoteResponse.status}`
         );
       }
       const arrayBuffer = await remoteResponse.arrayBuffer();
       fileBuffer = Buffer.from(arrayBuffer);
       fileName =
         new URL(data.url).pathname.split("/").pop() || "remote-upload.tmp";
-      console.log(
-        `File dari URL berhasil diunduh. Nama: ${fileName}, Ukuran: ${fileBuffer.length} bytes.`
-      );
+      console.log(`File dari URL berhasil diunduh. Nama: ${fileName}`);
     } else {
       throw new Error("Tidak ada file atau URL yang diberikan untuk diunggah.");
     }
 
-    // --- PROSES UPLOAD FILEMOON (Tidak ada perubahan di sini) ---
+    // --- PROSES UPLOAD FILEMOON ---
     console.log("Meminta upload server dari Filemoon...");
     const serverResponse = await fetch(
       `https://api.filemoon.sx/api/upload/server?key=${FILEMOON_API_KEY}`
@@ -103,8 +103,6 @@ exports.handler = async (event) => {
     };
   } catch (error) {
     console.error("Terjadi error di dalam fungsi 'upload':", error.message);
-    // Kita juga tambahkan stack trace untuk info lebih detail
-    console.error("Stack Trace:", error.stack);
     return {
       statusCode: 500,
       body: JSON.stringify({ success: false, message: error.message }),
