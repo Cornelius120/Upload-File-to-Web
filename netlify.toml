@@ -1,0 +1,22 @@
+# File Konfigurasi untuk Netlify
+
+# Pengaturan Build Dasar
+[build]
+  # Direktori yang berisi file frontend Anda (HTML, CSS, JS)
+  publish = "public/"
+  
+  # Direktori yang berisi Netlify Functions Anda
+  functions = "functions/"
+
+# Pengaturan untuk Netlify Dev (saat menjalankan di lokal)
+[dev]
+  # Direktori yang sama dengan di atas
+  publish = "public/"
+  functions = "functions/"
+
+# Baris ini memastikan bahwa jika pengguna me-refresh halaman,
+# situs tetap berjalan dengan baik (khususnya untuk single-page apps)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
