@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi Uploader</title>
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <body>
+    <div class="uploader-container">
+      <h1>Upload File ke Banyak Host</h1>
+      <form id="upload-form">
+        <div class="upload-source">
+          <label for="file-input">Pilih File:</label>
+          <input type="file" id="file-input" name="file" />
+          <p>atau</p>
+          <label for="url-input">Masukkan URL:</label>
+          <input
+            type="text"
+            id="url-input"
+            placeholder="https://example.com/file.zip"
+          />
+        </div>
+
+        <fieldset class="host-selection">
+          <legend>Pilih Host Favorit</legend>
+          <div>
+            <input
+              type="checkbox"
+              id="filemoon"
+              name="hosts"
+              value="filemoon"
+            />
+            <label for="filemoon">Filemoon</label>
+          </div>
+          <div>
+            <input type="checkbox" id="mixdrop" name="hosts" value="mixdrop" />
+            <label for="mixdrop">Mixdrop</label>
+          </div>
+        </fieldset>
+
+        <button type="submit" id="submit-button">Upload Sekarang</button>
+      </form>
+
+      <div id="progress-indicator" class="hidden">
+        <p>Mengupload, mohon tunggu...</p>
+        <div class="spinner"></div>
+      </div>
+
+      <div id="results-area">
+        <h2>Hasil Link:</h2>
+        <ul id="results-list"></ul>
+      </div>
+    </div>
+    <script src="scripts/app.js"></script>
+  </body>
+</html>
