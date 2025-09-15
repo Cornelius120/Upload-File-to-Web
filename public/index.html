@@ -2,55 +2,89 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- WAJIB: Tag ini membuat website responsif di mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi Uploader</title>
+
+    <!-- Memuat font dari Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="styles/main.css" />
   </head>
   <body>
-    <div class="uploader-container">
-      <h1>Upload File ke Banyak Host</h1>
-      <form id="upload-form">
-        <div class="upload-source">
-          <label for="file-input">Pilih File:</label>
-          <input type="file" id="file-input" name="file" />
-          <p>atau</p>
-          <label for="url-input">Masukkan URL:</label>
-          <input
-            type="text"
-            id="url-input"
-            placeholder="https://example.com/file.zip"
-          />
-        </div>
+    <div class="container">
+      <header class="main-header">
+        <h1 class="title">Multi-Host Uploader</h1>
+        <p class="subtitle">Unggah file Anda ke beberapa host sekaligus.</p>
+        <nav>
+          <a href="profile.html" class="nav-link">Pengaturan Profil</a>
+        </nav>
+      </header>
 
-        <fieldset class="host-selection">
-          <legend>Pilih Host Favorit</legend>
-          <div>
+      <main class="uploader-card">
+        <form id="upload-form">
+          <div class="upload-source">
+            <label for="file-input" class="file-label">
+              <span id="file-name-display">Klik untuk memilih file...</span>
+            </label>
+            <input type="file" id="file-input" name="file" />
+
+            <div class="separator"><span>atau</span></div>
+
             <input
-              type="checkbox"
-              id="filemoon"
-              name="hosts"
-              value="filemoon"
+              type="text"
+              id="url-input"
+              class="url-input"
+              placeholder="Masukkan URL file untuk diunggah"
             />
-            <label for="filemoon">Filemoon</label>
           </div>
-          <div>
-            <input type="checkbox" id="mixdrop" name="hosts" value="mixdrop" />
-            <label for="mixdrop">Mixdrop</label>
-          </div>
-        </fieldset>
 
-        <button type="submit" id="submit-button">Upload Sekarang</button>
-      </form>
+          <fieldset class="host-selection">
+            <legend>Pilih Host Tujuan</legend>
+            <div class="host-options">
+              <div class="host-option">
+                <input
+                  type="checkbox"
+                  id="filemoon"
+                  name="hosts"
+                  value="filemoon"
+                />
+                <label for="filemoon">Filemoon</label>
+              </div>
+              <!-- Tambahkan host lain di sini dengan struktur yang sama -->
+              <!-- <div class="host-option">
+                            <input type="checkbox" id="mixdrop" name="hosts" value="mixdrop">
+                            <label for="mixdrop">Mixdrop</label>
+                        </div> -->
+            </div>
+          </fieldset>
 
-      <div id="progress-indicator" class="hidden">
-        <p>Mengupload, mohon tunggu...</p>
+          <button type="submit" id="submit-button" class="submit-btn">
+            <span class="btn-text">Upload Sekarang</span>
+          </button>
+        </form>
+      </main>
+
+      <section id="progress-indicator" class="progress-card hidden">
         <div class="spinner"></div>
-      </div>
+        <p>Mengunggah, mohon tunggu...</p>
+      </section>
 
-      <div id="results-area">
+      <section id="results-area" class="results-card hidden">
         <h2>Hasil Link:</h2>
-        <ul id="results-list"></ul>
-      </div>
+        <ul id="results-list">
+          <!-- Hasil link akan muncul di sini -->
+        </ul>
+      </section>
+
+      <footer class="main-footer">
+        <p>&copy; 2025 Dibuat untuk Miyamura.</p>
+      </footer>
     </div>
     <script src="scripts/app.js"></script>
   </body>
